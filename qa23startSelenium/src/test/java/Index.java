@@ -22,7 +22,25 @@ public class Index {
     public void cssLocator() {
         //tag name
         WebElement element = wd.findElement(By.tagName("button"));
-        //   List<WebElements> list  =  wd.findElement(By.tagName("a"));
+        List<WebElement> list = wd.findElements(By.tagName("a"));
+        //find elements by class
+        WebElement element1 = wd.findElement(By.className("container"));
+        WebElement element2 = wd.findElement(By.cssSelector(".container"));
+        List<WebElement> list1 = wd.findElements(By.className("nav-item"));
+        List<WebElement> list2 = wd.findElements(By.cssSelector(".nav-item"));
+        //by ID
+        WebElement element3 = wd.findElement(By.id("nav"));
+        WebElement element4 = wd.findElement(By.cssSelector("#nav"));
+        //by attribute
+        WebElement element5 = wd.findElement(By.cssSelector("[href='#item3']"));
+        WebElement element6 = wd.findElement(By.cssSelector("[placeholder='Type your name']"));
+        WebElement element7 = wd.findElement(By.name("name"));
+        WebElement element8 = wd.findElement(By.cssSelector("[name = 'surename']"));
+        //by linkText and partialTextLink
+        WebElement element9 = wd.findElement(By.linkText("Item 1"));
+        WebElement element10 = wd.findElement(By.partialLinkText("m 1"));
+
+
     }
 
     @Test
@@ -76,5 +94,8 @@ public class Index {
     @Test
     public void stop() {
         wd.quit();
+
     }
+
+
 }
