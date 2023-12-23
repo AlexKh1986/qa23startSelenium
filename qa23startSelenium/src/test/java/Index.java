@@ -2,6 +2,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -39,7 +40,8 @@ public class Index {
         //by linkText and partialTextLink
         WebElement element9 = wd.findElement(By.linkText("Item 1"));
         WebElement element10 = wd.findElement(By.partialLinkText("m 1"));
-
+        //by xpath
+        WebElement input = wd.findElement(By.cssSelector("[placeholder='Type your name']"));
 
     }
 
@@ -91,7 +93,7 @@ public class Index {
         }
     }
 
-    @Test
+    @AfterClass
     public void stop() {
         wd.quit();
 
