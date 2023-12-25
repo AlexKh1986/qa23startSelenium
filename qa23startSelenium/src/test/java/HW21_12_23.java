@@ -1,7 +1,5 @@
-import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.chrome.ChromeDriver;
 
 import org.testng.annotations.AfterClass;
@@ -9,12 +7,16 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class HW21_12_23 {
     WebDriver wd;
     private JavascriptExecutor js;
     private static final Set<String> uniqueAttributes = new HashSet<>();
     private static final Random random = new Random();
+    private final Set<String> uniqueClasses = new HashSet<>();
+    private final List<WebElement> foundElements = new ArrayList<>();
+    private List<WebElement> allElements;
 
     @BeforeClass
     public void setUp() {
@@ -22,18 +24,21 @@ public class HW21_12_23 {
         wd = new ChromeDriver();
         js = (JavascriptExecutor) wd;
         wd.get("https://telranedu.web.app/login");
+       allElements = wd.findElements(By.xpath("//*"));
+
     }
 
     @Test
     public void testFindUniqueClasses() {
-        List<WebElement> allElements = wd.findElements(By.xpath("//*"));
-        HashSet<String> uniqueClasses = new HashSet<>();
+        uniqueClasses.clear();
+        foundElements.clear();
 
         for (WebElement element : allElements) {
             String className = element.getAttribute("class");
             if (className != null && !className.isEmpty()) {
                 String[] classes = className.split("\\s+");
-                uniqueClasses.addAll(Arrays.asList(classes));
+                Collections.addAll(uniqueClasses, classes);
+                foundElements.add(element);
             }
         }
 
@@ -43,12 +48,9 @@ public class HW21_12_23 {
         }
     }
 
-
     @Test
     public void testFindUniqueAttributes() {
-        List<WebElement> allElements = wd.findElements(By.xpath("//*"));
-        Set<String> uniqueAttributes = new HashSet<>();
-
+        uniqueAttributes.clear();
         for (WebElement element : allElements) {
             Object attributeObj = js.executeScript(
                     "var items = {}; " +
@@ -142,6 +144,62 @@ public class HW21_12_23 {
         String[] allAttributes = uniqueAttributes.toArray(new String[0]);
         String selectedAttribute = allAttributes[random.nextInt(allAttributes.length)];
         return selectedAttribute.substring(0, Math.min(3, selectedAttribute.length()));
+    }
+
+    private List<WebElement> findParents(WebElement element) {
+        List<WebElement> parents = new ArrayList<>();
+        try {
+            WebElement parent = element.findElement(By.xpath(".."));
+            while (parent != null && !(parent.getTagName().equals("html"))) {
+                parents.add(parent);
+                parent = parent.findElement(By.xpath(".."));
+            }
+        } catch (NoSuchElementException e) {
+            // Обработка случая, когда родительский элемент не найден
+        }
+        return parents;
+    }
+
+    private List<WebElement> findDescendants(WebElement element) {
+        return element.findElements(By.xpath(".//*"));
+    }
+
+    @Test
+    public void testFindParentAndChildrenOfElement() {
+        WebElement element = findElementByClass(uniqueClasses);
+        if (element != null) {
+            WebElement parentElement = element.findElement(By.xpath(".."));
+            System.out.println("Parent Tag: " + (parentElement != null ? parentElement.getTagName() : "None"));
+            List<WebElement> allDescendants = element.findElements(By.xpath(".//*"));
+            System.out.println("Found " + allDescendants.size() + " descendants.");
+            for (WebElement descendant : allDescendants) {
+                System.out.println("Descendant Tag: " + descendant.getTagName());
+            }
+        } else {
+            System.out.println("No element found with unique classes.");
+        }
+    }
+
+    private WebElement findElementByClass(Set<String> uniqueClasses) {
+        for (String cls : uniqueClasses) {
+            WebElement element = wd.findElement(By.className(cls));
+            if (element != null) {
+                return element;
+            }
+        }
+        return null;
+    }
+
+    @Test
+    public void testFindParentsAndDescendants() {
+        for (WebElement element : foundElements) {
+            List<WebElement> parents = findParents(element);
+            List<WebElement> descendants = findDescendants(element);
+
+            System.out.println("Element: " + element.getTagName());
+            System.out.println("Parents: " + parents.stream().map(WebElement::getTagName).collect(Collectors.joining(", ")));
+            System.out.println("Descendants: " + descendants.stream().map(WebElement::getTagName).collect(Collectors.joining(", ")));
+        }
     }
 
     @AfterClass
